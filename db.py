@@ -134,6 +134,11 @@ async def list_all_notes() -> List[Dict[str, Any]]:
             d = {k: v for k, v in data.items() if k != 'id' and k != 'payload'}
             nid = doc.id.replace("note:", "")
             d["id"] = nid
+            try:
+                ttl = await client.ttl(doc.id)
+                d["ttl"] = ttl
+            except:
+                d["ttl"] = -1
             notes.append(d)
         return notes
     except Exception as e:

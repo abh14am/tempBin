@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrivateBin - Admin</title>
+    <title>TempBin - Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
     <style>
@@ -20,7 +20,7 @@
             <div class="logo-icon-bg">
                 <span style="font-weight:bold;">!</span>
             </div>
-            <span>PrivateBin Admin</span>
+            <span>TempBin Admin</span>
         </div>
     </nav>
     <main>
@@ -31,8 +31,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>ID (Link)</th>
                         <th>Created</th>
+                        <th>Deletes At</th>
                         <th>Title</th>
                         <th>Burn?</th>
                         <th>Password?</th>
@@ -40,7 +41,7 @@
                     </tr>
                 </thead>
                 <tbody id="adminTableBody">
-                    <tr><td colspan="6">Loading...</td></tr>
+                    <tr><td colspan="7">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -53,7 +54,7 @@
                 const res = await fetch('/api/notes/admin/list');
                 if (!res.ok) {
                     if (res.status === 401) {
-                        document.getElementById('adminTableBody').innerHTML = '<tr><td colspan="6" class="danger-text">Authentication required or invalid credentials! Refresh to retry.</td></tr>';
+                        document.getElementById('adminTableBody').innerHTML = '<tr><td colspan="7" class="danger-text">Authentication required or invalid credentials! Refresh to retry.</td></tr>';
                     } else {
                         throw new Error("HTTP " + res.status);
                     }
@@ -62,27 +63,42 @@
                 const data = await res.json();
                 renderTable(data);
             } catch(e) {
-                document.getElementById('adminTableBody').innerHTML = `<tr><td colspan="6" class="danger-text">Failed to connect: ${e.message}</td></tr>`;
+                document.getElementById('adminTableBody').innerHTML = `<tr><td colspan="7" class="danger-text">Failed to connect: ${e.message}</td></tr>`;
             }
         }
 
         function renderTable(notes) {
             const tbody = document.getElementById('adminTableBody');
             if (notes.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-muted">No bins exist on server.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-muted">No bins exist on server.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = notes.map(n => `
+            tbody.innerHTML = notes.map(n => {
+                let deletionTime = 'Never';
+                if (n.ttl && n.ttl > 0) {
+                    const d = new Date(Date.now() + n.ttl * 1000);
+                    deletionTime = d.toLocaleString();
+                } else if (n.is_burn === 'true') {
+                    deletionTime = 'On Read';
+                }
+
+                const baseUrl = window.location.origin + '/#/view/' + n.id;
+
+                return `
                 <tr>
-                    <td style="font-family: monospace;">${n.id}</td>
+                    <td style="font-family: monospace;">
+                        <a href="${baseUrl}" target="_blank" style="color:var(--primary); text-decoration:none;">${n.id}</a>
+                    </td>
                     <td>${new Date(n.created_at * 1000).toLocaleString()}</td>
+                    <td class="text-muted">${deletionTime}</td>
                     <td>${n.title || '<span class="text-muted">Untitled</span>'}</td>
                     <td class="${n.is_burn === 'true' ? 'danger-text' : ''}">${n.is_burn === 'true' ? 'Yes' : 'No'}</td>
                     <td class="${n.has_password === 'true' ? 'success-text' : ''}">${n.has_password === 'true' ? 'Yes' : 'No'}</td>
                     <td><button class="btn danger" onclick="deleteNote('${n.id}')">Delete</button></td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
         }
 
         async function deleteNote(id) {

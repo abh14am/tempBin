@@ -37,7 +37,6 @@ Access the admin panel at: `http://localhost:8000/admin`
 - **Default Password**: `admin123.` (Check `docker-compose.yml` to change)
 
 
-
 ---
 
 ## 🔒 Security Architecture
@@ -47,4 +46,4 @@ TempBin follows a strict **Zero-Knowledge** model:
 2. The browser encrypts your text locally.
 3. Only the *scrambled* ciphertext and its metadata (Title, Expiration) are sent to the Redis server.
 4. The decryption key is appended to the URL after a `#`. Because it is after the hash, your browser **never** transmits this key to the server during requests.
-5. **Total Privacy**: Even the server administrator cannot read the content of the notes.
+5. Even the server administrator cannot read the content of the notes.

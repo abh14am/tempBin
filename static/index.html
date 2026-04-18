@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrivateBin - Secure Notes</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Highlight.js theme -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container" onclick="app.showScreen('editor'); window.location.hash='';">
+            <div class="logo-icon-bg">
+                <i data-lucide="shield-alert" class="logo-icon"></i>
+            </div>
+            <span>PrivateBin</span> <span class="logo-subtitle">- Because ignorance is bliss</span>
+        </div>
+    </nav>
+
+    <div class="toolbar panel bg-light">
+        <div class="toolbar-inner">
+            <button class="btn ghost-bold" onclick="app.showScreen('editor'); window.location.hash='';">
+                <i data-lucide="file" style="width:14px;height:14px;"></i> New
+            </button>
+
+            <span class="toolbar-divider"></span>
+
+            <div class="tool-group">
+                <label for="noteExpiration" class="toolbar-label">Expires:</label>
+                <select id="noteExpiration" class="fancy-select">
+                    <option value="600">10 mins</option>
+                    <option value="1800">30 mins</option>
+                    <option value="86400" selected>1 day</option>
+                    <option value="604800">1 week</option>
+                    <option value="2592000">1 month</option>
+                    <option value="31536000">1 year</option>
+                    <option value="0">Never</option>
+                </select>
+            </div>
+
+            <div class="tool-group checkbox-group">
+                <input type="checkbox" id="noteBurn">
+                <label for="noteBurn">Burn after reading</label>
+            </div>
+
+            <div class="tool-group">
+                <input type="password" id="notePassword" placeholder="Password (recommended)" class="input-compact">
+            </div>
+
+            <div class="tool-group">
+                <label for="noteFormat" class="toolbar-label">Format:</label>
+                <select id="noteFormat" class="fancy-select" disabled>
+                    <option>Plain Text</option>
+                </select>
+            </div>
+
+            <div class="spacer"></div>
+
+            <button class="btn primary" id="sendBtn" onclick="app.saveNote()">
+                <i data-lucide="send" style="width:14px;height:14px;"></i> Send
+            </button>
+        </div>
+    </div>
+
+    <main id="appContainer">
+        <!-- Screens are injected here via JS -->
+    </main>
+
+    <!-- Templates -->
+    <template id="tpl-editor">
+        <div class="editor-screen">
+            <!-- URL Banner injected if needed -->
+            <div id="urlBanner" class="success-banner" style="display: none;">
+                <i data-lucide="check" style="color:var(--success); width:16px; height:16px;"></i>
+                <span style="font-weight: 500;">Your paste is</span> 
+                <a id="urlHashText" href="#" target="_blank" class="url-badge"></a> 
+                <span class="text-muted">(Hit [Ctrl]+[c] to copy)</span>
+                <span class="delete-link" onclick="app.deleteCurrentNote()">Delete data</span>
+            </div>
+
+            <div class="editor-container mt-2">
+                <input type="text" id="noteTitle" placeholder="Optional Title (unencrypted)..." class="title-input panel">
+                
+                <textarea id="noteContent" class="panel mt-2" placeholder="Type your text or code here..."></textarea>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-view">
+        <div class="view-screen">
+            <div id="viewUrlBanner" class="success-banner mb-2">
+                <i data-lucide="info" style="color:var(--accent); width:16px; height:16px;"></i>
+                <span id="viewStatusMsg"></span>
+            </div>
+
+            <div class="view-header panel mb-2 mt-2" style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h2 id="viewTitle" style="font-size:1.5rem;">Untitled Note</h2>
+                    <div id="viewTags" class="tags-container mb-2"></div>
+                </div>
+                <span id="viewDate" class="text-muted text-sm"></span>
+            </div>
+            <div class="view-content panel markdown-body" id="viewContent">
+                <!-- Content injected here -->
+            </div>
+        </div>
+    </template>
+
+    <!-- Password Prompt overlay -->
+    <div id="passwordOverlay" class="overlay" style="display: none;">
+        <div class="password-dialog panel">
+            <h3 style="margin-bottom:0.5rem;">Password Required</h3>
+            <p class="text-muted text-sm" style="margin-bottom:1rem;">This paste is password protected. Enter password:</p>
+            <input type="password" id="dialogPassword" class="panel input-full mb-2" placeholder="Password">
+            <button class="btn primary" onclick="app.submitPassword()">Decrypt</button>
+        </div>
+    </div>
+
+
+    <!-- Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>

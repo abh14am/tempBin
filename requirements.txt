@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+redis
+python-jose[cryptography]
+passlib
+shortuuid
+python-multipart
